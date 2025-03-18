@@ -10,9 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 //Dependency Injection
-builder.Services.AddSingleton<ICategory, CategoryDal>();
+builder.Services.AddSingleton<ICategory, CategoryADO>();
 
-builder.Services.AddSingleton<IInstructor, InstructorDal>();
+builder.Services.AddSingleton<IInstructor, InstructorADO>();
 
 var app = builder.Build();
 
