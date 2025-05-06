@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Microsoft.EntityFrameworkCore;
 using WebApplication1;
 using WebApplication1.Data;
 using WebApplication1.Models;
@@ -9,11 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-//Dependency Injection
-builder.Services.AddSingleton<ICategory, CategoryADO>();
+//add ef core
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddSingleton<IInstructor, InstructorADO>();
-builder.Services.AddSingleton<ICourse, CourseADO>();
+//Dependency Injection
+builder.Services.AddScoped<ICategory, CategoryEF>();
+builder.Services.AddScoped<ICourse, CourseEF>();
+builder.Services.AddScoped<IInstructor, InstructorEF>();
+// builder.Services.AddSingleton<IInstructor, InstructorADO>();
+// builder.Services.AddSingleton<ICourse, CourseADO>();
 
 var app = builder.Build();
 
@@ -39,34 +45,34 @@ app.UseHttpsRedirection();
 //     return $"Luas segitiga dengan alas = {alas} dan tinggi = {tinggi} adalah {luas}";
 // });
 
-// app.MapGet("api/v1/categories", (ICategory categoryData)=>
-// {
-//     var categories = categoryData.GetCategories();
-//     return categories;
-// });
+app.MapGet("api/v1/categories", (ICategory categoryData)=>
+{
+    var categories = categoryData.GetCategories();
+    return categories;
+});
 
-// app.MapGet("api/v1/categories/{id}", (ICategory categoryData, int id) =>
-// {
-//     var category = categoryData.GetCategoryById(id);
-//     return category;
-// });
+app.MapGet("api/v1/categories/{id}", (ICategory categoryData, int id) =>
+{
+    var category = categoryData.GetCategoryById(id);
+    return category;
+});
 
-// app.MapPost("api/v1/categories", (ICategory categoryData, Category category) =>
-// {
-//     var newCategory = categoryData.AddCategory(category);
-//     return newCategory;
-// });
+app.MapPost("api/v1/categories", (ICategory categoryData, Category category) =>
+{
+    var newCategory = categoryData.AddCategory(category);
+    return newCategory;
+});
 
-// app.MapPut("api/v1/categories", (ICategory categoryData, Category category) =>
-// {
-//     var updatedCategory = categoryData.UpdateCategory(category);
-//     return updatedCategory;
-// });
-// app.MapDelete("api/v1/categories/{id}", (ICategory categoryData, int id) =>
-// {
-//     categoryData.DeleteCategory(id);
-//     return Results.NoContent();
-// });
+app.MapPut("api/v1/categories", (ICategory categoryData, Category category) =>
+{
+    var updatedCategory = categoryData.UpdateCategory(category);
+    return updatedCategory;
+});
+app.MapDelete("api/v1/categories/{id}", (ICategory categoryData, int id) =>
+{
+    categoryData.DeleteCategory(id);
+    return Results.NoContent();
+});
 
 app.MapGet("api/v1/instructors", (IInstructor instructorData)=>
 {

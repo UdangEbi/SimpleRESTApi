@@ -12,5 +12,7 @@ namespace WebApplication1.Models
         public string? CourseDescription {get; set;} = null!;
         public double Duration {get; set;}
         public int CategoryId {get; set;}
+
+        public Category Category { get; set; } = null!;
     }
 }

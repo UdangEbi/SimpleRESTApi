@@ -10,5 +10,7 @@ namespace WebApplication1.Models
         public int CategoryId {get; set; }
         
         public string CategoryName {get; set; } = null!;
+
+        public ICollection<Course> Courses { get; set; } = new List<Course>();
     }
 }
