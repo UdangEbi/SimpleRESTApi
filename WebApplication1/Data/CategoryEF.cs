@@ -49,13 +49,20 @@ namespace WebApplication1.Data
 
         public IEnumerable<Category> GetCategories()
         {
-            var categories = _context.Categories.OrderByDescending(c => c.CategoryName).ToList(); //lamda expression
+            // var categories = _context.Categories.OrderByDescending(c => c.CategoryName).ToList(); //lamda expression
+            var categories = from c in _context.Categories //ling
+                           orderby c.CategoryName descending
+                           select c;
+                           
             return categories;
         }
 
         public Category GetCategoryById(int categoryId)
         {
-            var category = _context.Categories.FirstOrDefault(c => c.CategoryId == categoryId); //lamda expression
+            // var category = _context.Categories.FirstOrDefault(c => c.CategoryId == categoryId); //lamda expression
+            var category = (from c in _context.Categories //ling
+                           where c.CategoryId == categoryId
+                           select c).FirstOrDefault();
             if (category == null)
             {
                 throw new Exception("Category not found");

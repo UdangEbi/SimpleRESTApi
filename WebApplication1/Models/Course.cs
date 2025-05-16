@@ -12,7 +12,11 @@ namespace WebApplication1.Models
         public string? CourseDescription {get; set;} = null!;
         public double Duration {get; set;}
         public int CategoryId {get; set;}
+        public int InstructorId {get; set;}
 
-        public Category Category { get; set; } = null!;
+        public Category? Category { get; set; }
+
+        public Instructor? Instructor { get; set; }
+
     }
 }

@@ -11,6 +11,6 @@ namespace WebApplication1.Models
         
         public string CategoryName {get; set; } = null!;
 
-        public ICollection<Course> Courses { get; set; } = new List<Course>();
+        public IEnumerable<Course> Courses { get; set; } = new List<Course>();
     }
 }

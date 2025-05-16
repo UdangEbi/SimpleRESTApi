@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1;
 using WebApplication1.Data;
+using WebApplication1.DTO;
 using WebApplication1.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -105,31 +106,131 @@ app.MapDelete("api/v1/instructors/{id}", (IInstructor instructorData, int id) =>
 
 app.MapGet("api/v1/courses", (ICourse courseData)=>
 {
-    var courses = courseData.GetCourses();
-    return courses;
+    var courses = courseData.GetAllCourses();
+    var courseDTOs = courses.Select(course => new CourseDTO
+    {
+        CourseId = course.CourseId,
+        CourseName = course.CourseName,
+        CourseDescription = course.CourseDescription,
+        Duration = course.Duration,
+        Category = course.Category == null ? null : new CategoryDTO
+        {
+            CategoryId = course.Category.CategoryId,
+            CategoryName = course.Category.CategoryName
+        },
+        Instructor = course.Instructor == null ? null : new InstructorDTO
+        {
+            InstructorId = course.Instructor.InstructorId,
+            InstructorName = course.Instructor.InstructorName
+        }
+    });
+    return Results.Ok(courseDTOs);
 });
 
 app.MapGet("api/v1/courses/{id}", (ICourse courseData, int id) =>
 {
-    var course = courseData.GetCourseById(id);
-    return course;
+    var course = courseData.GetCourseByIdCourse(id);
+    if (course == null) return Results.NotFound();
+
+    var courseDTO = new CourseDTO
+    {
+        CourseId = course.CourseId,
+        CourseName = course.CourseName,
+        CourseDescription = course.CourseDescription,
+        Duration = course.Duration,
+        Category = course.Category == null ? null : new CategoryDTO
+        {
+            CategoryId = course.Category.CategoryId,
+            CategoryName = course.Category.CategoryName
+        },
+        Instructor = course.Instructor == null ? null : new InstructorDTO
+        {
+            InstructorId = course.Instructor.InstructorId,
+            InstructorName = course.Instructor.InstructorName
+        }
+    };
+    return Results.Ok(courseDTO);
 });
 
-app.MapPost("api/v1/courses", (ICourse courseData, Course course) =>
+app.MapPost("api/v1/courses", (ICourse courseData, CourseAddDTO courseAddDTO) =>
 {
-    var newCourse = courseData.AddCourse(course);
-    return newCourse;
+    var course = new Course
+    {
+        CourseName = courseAddDTO.CourseName,
+        CourseDescription = courseAddDTO.CourseDescription,
+        Duration = courseAddDTO.Duration,
+        CategoryId = courseAddDTO.CategoryId,
+        InstructorId = courseAddDTO.InstructorId
+    };
+
+    var added = courseData.AddCourse(course);
+
+    var courseDTO = new CourseDTO
+    {
+        CourseId = added.CourseId,
+        CourseName = added.CourseName,
+        CourseDescription = added.CourseDescription,
+        Duration = added.Duration,
+        Category =  new CategoryDTO
+        {
+            CategoryId = added.CategoryId,
+            CategoryName = added.Category?.CategoryName??""
+        },
+        Instructor = new InstructorDTO
+        {
+            InstructorId = added.InstructorId,
+            InstructorName = added.Instructor?.InstructorName??""
+        },
+    };
+    return Results.Ok(courseDTO);  
 });
 
 app.MapPut("api/v1/courses", (ICourse courseData, Course course) =>
 {
-    var updatedCourse = courseData.UpdateCourse(course);
-    return updatedCourse;
+    var existingCourse = courseData.GetCourseByIdCourse(course.CourseId);
+    if (existingCourse == null)
+        return Results.NotFound();
+
+    existingCourse.CourseName = course.CourseName;
+    existingCourse.CourseDescription = course.CourseDescription;
+    existingCourse.Duration = course.Duration;
+    existingCourse.CategoryId = course.CategoryId;
+    existingCourse.InstructorId = course.InstructorId;
+    
+    var updated = courseData.UpdateCourse(existingCourse);
+
+    var courseDTO = new CourseDTO
+    {
+        CourseId = updated.CourseId,
+        CourseName = updated.CourseName,
+        CourseDescription = updated.CourseDescription,
+        Duration = updated.Duration,
+        Category = updated.Category == null ? null : new CategoryDTO
+        {
+            CategoryId = updated.Category.CategoryId,
+            CategoryName = updated.Category.CategoryName
+        },
+        Instructor = updated.Instructor == null ? null : new InstructorDTO
+        {
+            InstructorId = updated.Instructor.InstructorId,
+            InstructorName = updated.Instructor.InstructorName
+        }
+    };
+
+    return Results.Ok(courseDTO);
 });
 app.MapDelete("api/v1/courses/{id}", (ICourse courseData, int id) =>
 {
-    courseData.DeleteCourse(id);
-    return Results.NoContent();
+    try
+    {
+        courseData.DeleteCourse(id);
+        return Results.NoContent();
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message);
+    }
 });
+
 app.Run();
 

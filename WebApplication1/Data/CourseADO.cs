@@ -116,6 +116,11 @@ namespace WebApplication1.Data
             }
         }
 
+        public Course GetCourseByIdCourse(int courseId)
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<ViewCourseWithCategory> GetCourses()
         {
             using(SqlConnection conn = new SqlConnection(connStr))
@@ -189,6 +194,11 @@ namespace WebApplication1.Data
                     conn.Close();
                 }
             }
+        }
+
+        IEnumerable<Course> ICourse.GetAllCourses()
+        {
+            throw new NotImplementedException();
         }
     }
 }
